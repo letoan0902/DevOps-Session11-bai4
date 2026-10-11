@@ -250,7 +250,7 @@ Login Succeeded!
 Lần chạy khi chưa có secret sẽ lỗi, log có dạng:
 
 ```
-Error: Username and password required
+Error: Password required
 ```
 
 Đây là hành vi đúng của `docker/login-action@v3` khi `password` rỗng (secret chưa tồn tại thì `${{ secrets.REGISTRY_TOKEN }}` trả về chuỗi rỗng, không báo lỗi riêng).
@@ -293,7 +293,7 @@ Cột NAME phải có `REGISTRY_TOKEN`; cột UPDATED là thời điểm tạo h
 
 | Triệu chứng | Nguyên nhân | Cách khắc phục |
 |-------------|-------------|----------------|
-| `Error: Username and password required` | Secret `REGISTRY_TOKEN` chưa tồn tại, tên sai, hoặc workflow chạy từ PR của fork nên không nhận secret | Tạo secret đúng tên theo mục 4, rồi Re-run jobs; với PR từ fork, chạy lại workflow trên repo gốc |
+| `Error: Password required` | Secret `REGISTRY_TOKEN` chưa tồn tại, tên sai, hoặc workflow chạy từ PR của fork nên không nhận secret | Tạo secret đúng tên theo mục 4, rồi Re-run jobs; với PR từ fork, chạy lại workflow trên repo gốc |
 | `Error response from daemon: Get "https://ghcr.io/v2/": denied` hoặc `unauthorized` | Token thiếu quyền `write:packages`, `username` không khớp chủ token, hoặc token bị thu hồi | Tạo PAT mới với `write:packages`, đặt `username` là tên chủ PAT, cập nhật secret |
 | Trước đó đăng nhập thành công, nay lỗi `denied` hoặc `401` | PAT đã hết hạn | Tạo PAT mới, ghi đè secret `REGISTRY_TOKEN` bằng `gh secret set REGISTRY_TOKEN --repo letoan0902/DevOps-Session11-bai4` |
 | Secret có nhưng log vẫn báo thiếu mật khẩu | Sai tên trong `ci.yml` (ví dụ `REGISTRY_TOKENS`) hoặc secret được tạo ở mức Environment/Organization không gắn với job | Đối chiếu tên trong `ci.yml` với kết quả `gh secret list`; tạo secret ở mức Repository |
@@ -321,7 +321,7 @@ Cột NAME phải có `REGISTRY_TOKEN`; cột UPDATED là thời điểm tạo h
 
 - Workflow `ci.yml` đã được viết, kiểm tra bằng actionlint (không lỗi) và được đẩy lên repository `letoan0902/DevOps-Session11-bai4` cùng toàn bộ nội dung bài nộp.
 - Personal Access Token và secret `REGISTRY_TOKEN` do học viên tự tạo theo hướng dẫn ở mục 4, vì token là thông tin cá nhân không được chia sẻ hay lưu trong repo.
-- Lần chạy đầu tiên khi chưa có secret dự kiến thất bại ở bước đăng nhập với thông báo `Error: Username and password required`. Sau khi học viên tạo secret và chạy lại (Re-run jobs hoặc `gh workflow run ci.yml`), bước đăng nhập cho kết quả `Logging into ghcr.io...` và `Login Succeeded!` như mô tả ở mục 6.
+- Lần chạy đầu tiên khi chưa có secret dự kiến thất bại ở bước đăng nhập với thông báo `Error: Password required`. Sau khi học viên tạo secret và chạy lại (Re-run jobs hoặc `gh workflow run ci.yml`), bước đăng nhập cho kết quả `Logging into ghcr.io...` và `Login Succeeded!` như mô tả ở mục 6.
 - Kết quả thực tế của từng lần chạy được ghi ở dòng "Trạng thái CI" trong `README.md` gốc của repository.
 
 ## 12. Kết luận
