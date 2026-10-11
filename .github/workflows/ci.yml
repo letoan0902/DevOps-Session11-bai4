@@ -1,0 +1,59 @@
+# Bài 4 - Session 11: Khai báo GitHub Secrets và cấu hình đăng nhập GitHub Container Registry (GHCR)
+#
+# Mục tiêu: dùng secret REGISTRY_TOKEN (Personal Access Token classic, quyền write:packages)
+# để đăng nhập tự động vào ghcr.io bằng action docker/login-action@v3.
+name: CI - Dang nhap GitHub Container Registry
+
+# Điều kiện kích hoạt workflow
+on:
+  # Chạy khi có commit được đẩy lên nhánh main
+  push:
+    branches:
+      - main
+  # Chạy khi có Pull Request (lưu ý: PR từ fork không đọc được secrets)
+  pull_request:
+  # Cho phép chạy thủ công trên tab Actions hoặc bằng lệnh: gh workflow run ci.yml
+  workflow_dispatch:
+
+# Quyền tối thiểu cho GITHUB_TOKEN tự động của workflow (nguyên tắc least privilege)
+permissions:
+  contents: read   # đủ để checkout mã nguồn
+  packages: write  # quyền làm việc với GitHub Packages / GHCR
+
+jobs:
+  login-registry:
+    name: Đăng nhập Registry
+    runs-on: ubuntu-latest
+    steps:
+      # Bước 1: lấy mã nguồn của repository về runner
+      - name: Checkout mã nguồn
+        uses: actions/checkout@v5
+
+      # Bước 2: kiểm tra Docker đã được cài sẵn trên runner ubuntu-latest
+      - name: Kiểm tra Docker trên runner
+        run: docker version
+
+      # Bước 3: đăng nhập GHCR
+      # - registry : máy chủ registry cần đăng nhập
+      # - username : tài khoản kích hoạt workflow (ngữ cảnh github.actor)
+      # - password : Personal Access Token lưu trong Repository Secret REGISTRY_TOKEN
+      #   (log sẽ hiển thị *** thay cho giá trị thật của secret)
+      - name: Đăng nhập vào GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+
+      # Bước 4: xác nhận sau đăng nhập
+      # Chỉ in tên registry có trong file cấu hình Docker, không in thông tin xác thực
+      - name: Xác nhận đã đăng nhập
+        run: |
+          echo "Da dang nhap ghcr.io voi tai khoan ${{ github.actor }}"
+          jq '.auths | keys' ~/.docker/config.json
+
+      # Bước 5: đăng xuất để xóa thông tin xác thực khỏi runner
+      # if: always() đảm bảo bước này chạy dù các bước trước thành công hay thất bại
+      - name: Đăng xuất khỏi GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io

@@ -1,0 +1,7 @@
+Công cụ : actionlint v1.7.12 (image rhysd/actionlint:latest, chạy qua Docker)
+Lệnh    : MSYS_NO_PATHCONV=1 docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest -no-color .github/workflows/ci.yml
+Ghi chú : đề bài gợi ý cờ -color=never nhưng phiên bản này chỉ hỗ trợ -no-color (cờ -color là boolean).
+
+--- Output (rỗng nghĩa là không phát hiện lỗi) ---
+
+--- Mã thoát: 0 ---
